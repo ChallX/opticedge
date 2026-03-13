@@ -1,12 +1,13 @@
 export const initMockData = () => {
   if (!localStorage.getItem('visilant_patients')) {
     const mockPatients = [
-      { id: 'VS-8892', name: 'Aarav Patel', age: 45, status: 'pending', date: '2023-10-24', symptom: 'Blurry Vision', risk: 'high', createdBy: 'patient1' },
-      { id: 'VS-8891', name: 'Mira Singh', age: 62, status: 'reviewed', date: '2023-10-24', diagnosis: 'Normal', risk: 'low', createdBy: 'patient2' },
-      { id: 'VS-8890', name: 'Rajesh Kumar', age: 55, status: 'urgent', date: '2023-10-23', diagnosis: 'Glaucoma Risk', risk: 'high', createdBy: 'admin' },
-      { id: 'VS-8889', name: 'Sunita Devi', age: 38, status: 'reviewed', date: '2023-10-21', diagnosis: 'Cataract (Early)', risk: 'medium', createdBy: 'admin' },
-      { id: 'VS-8888', name: 'Kabir Das', age: 71, status: 'reviewed', date: '2023-10-20', diagnosis: 'Normal', risk: 'low', createdBy: 'patient1' },
+      { id: 'VS-8892', name: 'Aarav Patel', age: 45, status: 'pending', date: '2023-10-24', symptom: 'Blurry Vision', risk: 'high', createdBy: 'patient1', phone: '+91 98765 43210', location: 'Village Block A, Near Primary School' },
+      { id: 'VS-8891', name: 'Mira Singh', age: 62, status: 'reviewed', date: '2023-10-24', diagnosis: 'Normal', risk: 'low', createdBy: 'patient2', phone: '+91 98765 43211', location: 'Village Block B, Sector 4' },
+      { id: 'VS-8890', name: 'Rajesh Kumar', age: 55, status: 'urgent', date: '2023-10-23', diagnosis: 'Glaucoma Risk', risk: 'high', createdBy: 'admin', phone: '+91 98765 43212', location: 'Village Block C, Near Water Tower' },
+      { id: 'VS-8889', name: 'Sunita Devi', age: 38, status: 'reviewed', date: '2023-10-21', diagnosis: 'Cataract (Early)', risk: 'medium', createdBy: 'admin', phone: '+91 98765 43213', location: 'Village Block A, Main Road' },
+      { id: 'VS-8888', name: 'Kabir Das', age: 71, status: 'reviewed', date: '2023-10-20', diagnosis: 'Normal', risk: 'low', createdBy: 'patient1', phone: '+91 98765 43214', location: 'Village Block D' },
     ];
+    // Force reset for this demonstration so existing users see the new fields immediately
     localStorage.setItem('visilant_patients', JSON.stringify(mockPatients));
   }
 };

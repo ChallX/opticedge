@@ -10,6 +10,9 @@ const PatientList = () => {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ diagnosis: '', status: '' });
+  const [zoomedImage, setZoomedImage] = useState(null);
+  const [showContactPopup, setShowContactPopup] = useState(false);
+  const [showLocatePopup, setShowLocatePopup] = useState(false);
   
   const { user } = useAuth();
 
@@ -83,10 +86,10 @@ const PatientList = () => {
           </div>
 
           <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
-            <button className="btn btn-outline" style={{ padding: '8px 12px', fontSize: '0.875rem' }}>
+            <button className="btn btn-outline" onClick={() => setShowContactPopup(true)} style={{ padding: '8px 12px', fontSize: '0.875rem' }}>
               <Phone size={16} /> Contact
             </button>
-            <button className="btn btn-outline" style={{ padding: '8px 12px', fontSize: '0.875rem' }}>
+            <button className="btn btn-outline" onClick={() => setShowLocatePopup(true)} style={{ padding: '8px 12px', fontSize: '0.875rem' }}>
               <MapPin size={16} /> Locate
             </button>
           </div>
@@ -104,6 +107,28 @@ const PatientList = () => {
               <span className="font-medium">{selectedPatient.diagnosis || 'Pending Review'}</span>
             </div>
           </div>
+
+          {selectedPatient.photos && selectedPatient.photos.left && selectedPatient.photos.right && (
+            <div style={{ marginBottom: '24px' }}>
+              <h3 className="font-bold border-b pb-2 mb-3" style={{ borderBottom: '1px solid var(--border)', paddingBottom: '8px' }}>Eye Images</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div 
+                  style={{ borderRadius: 'var(--radius-md)', overflow: 'hidden', cursor: 'zoom-in', height: '140px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column' }}
+                  onClick={() => setZoomedImage(selectedPatient.photos.left)}
+                >
+                  <img src={selectedPatient.photos.left} alt="Left Eye" style={{ width: '100%', height: 'calc(100% - 24px)', objectFit: 'cover' }} />
+                  <div className="text-xs text-center" style={{ padding: '4px', background: 'var(--bg-main)', borderTop: '1px solid var(--border)', fontWeight: '500' }}>Left Eye</div>
+                </div>
+                <div 
+                  style={{ borderRadius: 'var(--radius-md)', overflow: 'hidden', cursor: 'zoom-in', height: '140px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column' }}
+                  onClick={() => setZoomedImage(selectedPatient.photos.right)}
+                >
+                  <img src={selectedPatient.photos.right} alt="Right Eye" style={{ width: '100%', height: 'calc(100% - 24px)', objectFit: 'cover' }} />
+                  <div className="text-xs text-center" style={{ padding: '4px', background: 'var(--bg-main)', borderTop: '1px solid var(--border)', fontWeight: '500' }}>Right Eye</div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {isEditing ? (
             <div style={{ background: 'var(--bg-main)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
@@ -151,6 +176,83 @@ const PatientList = () => {
             </>
           )}
         </div>
+
+        {zoomedImage && (
+          <div 
+            style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', padding: '16px' }}
+            onClick={() => setZoomedImage(null)}
+          >
+            <img src={zoomedImage} alt="Zoomed Eye" style={{ maxWidth: '100%', maxHeight: '90vh', borderRadius: 'var(--radius-md)', objectFit: 'contain' }} />
+            <button 
+              style={{ position: 'absolute', top: '24px', right: '24px', background: 'var(--bg-card)', color: 'var(--text-main)', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', border: 'none', cursor: 'pointer', boxShadow: 'var(--shadow-md)' }}
+              onClick={(e) => { e.stopPropagation(); setZoomedImage(null); }}
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
+        {/* Contact Popup Modal */}
+        {showContactPopup && (
+          <div 
+            style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(9, 9, 11, 0.4)', backdropFilter: 'blur(2px)', padding: '16px' }}
+            onClick={() => setShowContactPopup(false)}
+          >
+            <div 
+              className="animate-slide-up"
+              style={{ background: 'var(--bg-card)', width: '100%', maxWidth: '400px', borderRadius: 'var(--radius-lg)', padding: '24px', boxShadow: 'var(--shadow-lg)', border: '1px solid var(--border)' }}
+              onClick={e => e.stopPropagation()}
+            >
+              <h3 className="text-lg font-bold" style={{ marginBottom: '8px' }}>Contact Information</h3>
+              <p className="text-sm text-muted" style={{ marginBottom: '20px' }}>Contact details for {selectedPatient.name}</p>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: 'var(--bg-main)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', marginBottom: '20px' }}>
+                <Phone size={20} className="text-muted" />
+                <div>
+                  <div className="text-xs text-muted mb-1">Phone Number</div>
+                  <div className="font-medium text-base">{selectedPatient.phone || 'No phone number provided'}</div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <button className="btn btn-outline" style={{ width: 'auto' }} onClick={() => setShowContactPopup(false)}>
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Locate Popup Modal */}
+        {showLocatePopup && (
+          <div 
+            style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(9, 9, 11, 0.4)', backdropFilter: 'blur(2px)', padding: '16px' }}
+            onClick={() => setShowLocatePopup(false)}
+          >
+            <div 
+              className="animate-slide-up"
+              style={{ background: 'var(--bg-card)', width: '100%', maxWidth: '400px', borderRadius: 'var(--radius-lg)', padding: '24px', boxShadow: 'var(--shadow-lg)', border: '1px solid var(--border)' }}
+              onClick={e => e.stopPropagation()}
+            >
+              <h3 className="text-lg font-bold" style={{ marginBottom: '8px' }}>Patient Location</h3>
+              <p className="text-sm text-muted" style={{ marginBottom: '20px' }}>Registered address for {selectedPatient.name}</p>
+              
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '12px', background: 'var(--bg-main)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', marginBottom: '20px' }}>
+                <MapPin size={20} className="text-muted" style={{ marginTop: '2px' }} />
+                <div>
+                  <div className="text-xs text-muted mb-1">Address / Village</div>
+                  <div className="font-medium text-base leading-relaxed">{selectedPatient.location || 'No location provided'}</div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <button className="btn btn-outline" style={{ width: 'auto' }} onClick={() => setShowLocatePopup(false)}>
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

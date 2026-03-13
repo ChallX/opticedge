@@ -3,24 +3,28 @@ import { Camera, CheckCircle, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { savePatient } from '../utils/localStorage';
 import { useAuth } from '../context/AuthContext';
+import { compressImage } from '../utils/imageCompression';
 
 const Screening = () => {
   const [step, setStep] = useState(1);
   const [photos, setPhotos] = useState({ left: null, right: null });
   const [formData, setFormData] = useState({
-    name: '', age: '', gender: '', symptom: '', location: ''
+    name: '', age: '', gender: '', phone: '', symptom: '', location: ''
   });
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const handleNext = () => setStep(step + 1);
   
-  const handlePhotoUpload = (e, eye) => {
+  const handlePhotoUpload = async (e, eye) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => setPhotos({ ...photos, [eye]: e.target.result });
-      reader.readAsDataURL(file);
+      try {
+        const compressedDataUrl = await compressImage(file, 800); // 800px max-width gives good balance
+        setPhotos(prev => ({ ...prev, [eye]: compressedDataUrl }));
+      } catch (error) {
+        console.error("Failed to compress image:", error);
+      }
     }
   };
 
@@ -32,7 +36,7 @@ const Screening = () => {
     e.preventDefault();
     savePatient({
       ...formData,
-      photos: true, // Only store boolean flag for local storage limits
+      photos: { left: photos.left, right: photos.right },
       createdBy: user.id
     });
     setStep(3); // Show Success
@@ -72,6 +76,10 @@ const Screening = () => {
                     <option value="O">Other</option>
                   </select>
                 </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Phone Number</label>
+                <input type="tel" name="phone" className="form-control" placeholder="e.g. +91 98765 43210" value={formData.phone} onChange={handleInputChange} required />
               </div>
               <div className="form-group">
                 <label className="form-label">Primary Symptom</label>
